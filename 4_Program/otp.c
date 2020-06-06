@@ -119,7 +119,6 @@ int main(int argc, char *argv[])
 		sprintf(buffer, "%s", user);
 	}
 	// Send message to server
-  printf("message sent to server %s", buffer);
 	charsWritten = send(socketFD, buffer, strlen(buffer), 0); // Write to the server
 	if (charsWritten < 0) error("CLIENT: ERROR writing to socket");
 	if (charsWritten < strlen(buffer)) printf("CLIENT: WARNING: Not all data written to socket!\n");

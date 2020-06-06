@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/stat.h>
@@ -16,11 +16,11 @@ void error(const char *msg) { perror(msg); exit(1); } // Error function used for
 //returns 0 if the client made a GET request, returns 1 if the client made a POST request
 int parseRequest(char * msg, char ** msgArray){
   msgArray[0] = strtok(msg, " ");   //store user name
-  char * key = strtok(NULL, "\0");  
+  char * key = strtok(NULL, "\0");
   msgArray[1] = key;                //store message
   int i, count = 0;
-  if (key == NULL) { return 0; }		//GET request
-								
+  if (msgArray[1] == NULL) { return 0; }		//GET request
+
   for ( i = 0; key[i] != '\0'; i++) { count++; }	//count key length
   char charCount[100];
   sprintf(charCount, "%d", count);
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 			if((entry->d_name[0] == 'c')){
 				//if this is the most recent directory, record its name
 				if (stats.st_mtime < oldestFile) {
-					sprintf(oldestCiper, "%s", entry->d_name); 
+					sprintf(oldestCiper, "%s", entry->d_name);
 					oldestFile = stats.st_mtime;
 				}
 			}
@@ -122,21 +122,21 @@ int main(int argc, char *argv[])
 		strcat(path, "cipherText");
 		FILE *file = fopen(path, "w+");		//create cipherText file in user directory
 		if (file == NULL) { ("ERROR opening file"); }
-		int msgLength = atoi(msgArr[2]);	
+		int msgLength = atoi(msgArr[2]);
 		char parsedMsg[msgLength+1];
 		strcpy(parsedMsg, msgArr[1]);
 		strcat(parsedMsg, "\n\0");
 		fprintf(file, "%s", parsedMsg);		//print message in cipherText file
 		fclose(file);
-		
+
 		//print path to STDOUT
 		char cwd[4097];
 		getcwd(cwd, sizeof(cwd));
 		strcat(cwd, &path[1]);
 		fprintf(stdout, "%s\n", cwd);
 	}
-	
+
 	close(establishedConnectionFD); // Close the existing socket which is connected to the client
 	close(listenSocketFD); // Close the listening socket
-	return 0; 
+	return 0;
 }

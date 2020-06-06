@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <netdb.h> 
+#include <netdb.h>
 
 void error(const char *msg) { perror(msg); exit(0); } // Error function used for reporting issues
 //function to convert message into cipher to be sent to server
@@ -30,7 +30,7 @@ void createCipher(char * plainText, char * keyText, char * cipherText){
     //create cipher array
     cipherArr[i] = textArr[i] + keyArr[i];
     cipherArr[i] %= 27;
-    
+
     if (cipherArr[i] == 26) { cipherText[i] = 32; }    //check if plaintext contains a space or convert char to numeric representation
     else { cipherText[i] = cipherArr[i] + 65; }
   }
@@ -40,24 +40,26 @@ void createCipher(char * plainText, char * keyText, char * cipherText){
 int main(int argc, char *argv[])
 {
 	int socketFD, portNumber, charsWritten, charsRead;
-	int getBool, postBool, i = 0;
+	int getBool = 0;
+  int postBool = 0;
+  int i = 0;
 	struct sockaddr_in serverAddress;
 	struct hostent* serverHostInfo;
 	int bufferSize = 200000;
 	char buffer[bufferSize];
 	//check arguments for error and request method
-	if (argc < 5) { fprintf(stderr,"ERROR: Too Few Arguments\n"); exit(0); } 
-	if (argc > 6) { fprintf(stderr,"ERROR: Too Many Arguments\n"); exit(0); } 
+	if (argc < 5) { fprintf(stderr,"ERROR: Too Few Arguments\n"); exit(0); }
+	if (argc > 6) { fprintf(stderr,"ERROR: Too Many Arguments\n"); exit(0); }
 	if (strcmp(argv[1],"post") == 0){
 		portNumber = atoi(argv[5]); // Get the port number, convert to an integer from a string
 		postBool = 1;
-	} 
+	}
 	else if (strcmp(argv[1],"get") == 0){
 		portNumber = atoi(argv[4]);
 		getBool = 1;
-	} 
+	}
 	else { error("ERROR: Invalid First Argument"); }
-	
+
 	// Set up the server address struct
 	memset((char*)&serverAddress, '\0', sizeof(serverAddress)); // Clear out the address struct
 	serverAddress.sin_family = AF_INET; // Create a network-capable socket
@@ -69,7 +71,7 @@ int main(int argc, char *argv[])
 	// Set up the socket
 	socketFD = socket(AF_INET, SOCK_STREAM, 0); // Create the socket
 	if (socketFD < 0) error("CLIENT: ERROR opening socket");
-	
+
 	// Connect to server
 	if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) // Connect socket to address
 		error("CLIENT: ERROR connecting");
@@ -113,10 +115,11 @@ int main(int argc, char *argv[])
 		sprintf(buffer, "%s %s", user, cipherText);
 	}
 	//make POST request
-	if(getBool){ 
-		sprintf(buffer, "%s", user); 
+	if(getBool){
+		sprintf(buffer, "%s", user);
 	}
 	// Send message to server
+  printf("message sent to server %s", buffer);
 	charsWritten = send(socketFD, buffer, strlen(buffer), 0); // Write to the server
 	if (charsWritten < 0) error("CLIENT: ERROR writing to socket");
 	if (charsWritten < strlen(buffer)) printf("CLIENT: WARNING: Not all data written to socket!\n");
@@ -129,7 +132,7 @@ int main(int argc, char *argv[])
 		if (charsRead < 0) error("CLIENT: ERROR reading from socket");
 		printf("%s", buffer);
 	}
-	
+
 	close(socketFD); // Close the socket
 	return 0;
 }

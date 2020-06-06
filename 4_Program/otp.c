@@ -53,10 +53,12 @@ int main(int argc, char *argv[])
 	if (strcmp(argv[1],"post") == 0){
 		portNumber = atoi(argv[5]); // Get the port number, convert to an integer from a string
 		postBool = 1;
+    getBool = 0;
 	}
 	else if (strcmp(argv[1],"get") == 0){
 		portNumber = atoi(argv[4]);
 		getBool = 1;
+    postBool = 0;
 	}
 	else { error("ERROR: Invalid First Argument"); }
 
@@ -114,9 +116,9 @@ int main(int argc, char *argv[])
 		createCipher(plaintText, keyText, cipherText);
 		sprintf(buffer, "%s %s", user, cipherText);
 	}
-	//make POST request
+	//make GET request
 	if(getBool){
-		sprintf(buffer, "%s", user);
+		fprintf(stdout, "%s", user);
 	}
 	// Send message to server
 	charsWritten = send(socketFD, buffer, strlen(buffer), 0); // Write to the server
@@ -130,8 +132,9 @@ int main(int argc, char *argv[])
 		charsRead = recv(socketFD, buffer, sizeof(buffer) - 1, 0); // Read data from the socket, leaving \0 at end
 		if (charsRead < 0) error("CLIENT: ERROR reading from socket");
 		printf("%s", buffer);
+    close(socketFD); // Close the socket
+    return 0;
 	}
-
 	close(socketFD); // Close the socket
 	return 0;
 }

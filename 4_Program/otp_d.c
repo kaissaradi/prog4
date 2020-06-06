@@ -10,7 +10,7 @@
 #include <limits.h>
 
 
-void error(const char *msg) { perror(msg); } // Error function used for reporting issues
+void error(const char *msg) { perror(msg); exit(1); } // Error function used for reporting issues
 
 //function that parses the request into an array of the user, cipher, and length of cipher
 //returns 0 if the client made a GET request, returns 1 if the client made a POST request
@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
     sizeOfClientInfo = sizeof(clientAddress); // Get the size of the address for the client that will connect
     establishedConnectionFD = accept(listenSocketFD, (struct sockaddr *)&clientAddress, &sizeOfClientInfo); // Accept
     if (establishedConnectionFD < 0) error("ERROR on accept");
+    sleep(2);
     pid = fork();
     if(pid < 0) { error("ERROR forking"); }
     if(pid == 0){
@@ -110,7 +111,6 @@ int main(int argc, char *argv[])
         } while (character != EOF);
         fclose(file);
         closedir(dir);
-        printf("%s", cipherMessage);
         // Send a Success message back to the client
         charsRead = send(establishedConnectionFD, cipherMessage, bufferSize, 0); // Send success back
         if (charsRead < 0) error("ERROR writing to socket");

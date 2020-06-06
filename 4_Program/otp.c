@@ -10,7 +10,6 @@
 void error(const char *msg) { perror(msg); exit(0); } // Error function used for reporting issues
 //function to convert message into cipher to be sent to server
 void createCipher(char * plainText, char * keyText, char * cipherText){
- printf("\nCIPHER: %ld\n\nPLAINTEXT: %ld\n\nKEY: %ld\n\n", strlen(cipherText), strlen(plainText), strlen(keyText)); 
   int i = 0;
   if (strlen(plainText) > strlen(keyText))
   {
@@ -35,8 +34,6 @@ void createCipher(char * plainText, char * keyText, char * cipherText){
     if (cipherArr[i] == 26) { cipherText[i] = 32; }    //check if plaintext contains a space or convert char to numeric representation
     else { cipherText[i] = cipherArr[i] + 65; }
   }
-  printf("\nCIPHER: %s\n\nPLAINTEXT: %s\n\nKEY: %s\n\n", cipherText, plainText, keyText); 
-  printf("\nCIPHER: %ld\n\nPLAINTEXT: %ld\n\nKEY: %ld\n\n", strlen(cipherText), strlen(plainText), strlen(keyText)); 
 }
 
 

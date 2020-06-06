@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 	 * ***********************************************************************/
 		//store message in a file in the users directory
 		mkdir(path, 0777);								//create a directory for the user
-		strcat(path, "/cipherText");
+		strcat(path, "cipherText");
 		FILE *file = fopen(path, "w+");		//create cipherText file in user directory
 		if (file == NULL) { ("ERROR opening file"); }
 		int msgLength = atoi(msgArr[2]);	
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 		//print path to STDOUT
 		char cwd[4097];
 		getcwd(cwd, sizeof(cwd));
-		strcat(cwd, &path[2]);
+		strcat(cwd, &path[1]);
 		fprintf(stdout, "%s\n", cwd);
 	}
 	

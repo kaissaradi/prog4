@@ -1,0 +1,4 @@
+#!/bin/bash 
+gcc -g -o opt_d opt_d.c
+gcc -g -o opt opt.c
+gcc -g -o keygen keygen.c

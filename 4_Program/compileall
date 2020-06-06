@@ -1,4 +1,4 @@
-#!/bin/bash 
-gcc -g -o opt_d opt_d.c
-gcc -g -o opt opt.c
+#!/bin/bash
+gcc -g -o otp_d otp_d.c
+gcc -g -o otp otp.c
 gcc -g -o keygen keygen.c

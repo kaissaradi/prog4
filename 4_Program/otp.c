@@ -125,16 +125,12 @@ int main(int argc, char *argv[])
 	if (charsWritten < 0) error("CLIENT: ERROR writing to socket");
 	if (charsWritten < strlen(buffer)) printf("CLIENT: WARNING: Not all data written to socket!\n");
 
-	if (getBool)
-	{
-		// Get return message from server
-		memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again for reuse
-		charsRead = recv(socketFD, buffer, sizeof(buffer) - 1, 0); // Read data from the socket, leaving \0 at end
-		if (charsRead < 0) error("CLIENT: ERROR reading from socket");
-		printf("%s", buffer);
-    close(socketFD); // Close the socket
-    return 0;
-	}
+  // Get return message from server
+  memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again for reuse
+  charsRead = recv(socketFD, buffer, sizeof(buffer) - 1, 0); // Read data from the socket, leaving \0 at end
+  if (charsRead < 0) error("CLIENT: ERROR reading from socket");
+  printf("%s", buffer);
+
 	close(socketFD); // Close the socket
 	return 0;
 }

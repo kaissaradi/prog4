@@ -9,7 +9,6 @@
 #include <dirent.h>
 #include <limits.h>
 
-
 void error(const char *msg) { perror(msg); exit(1); } // Error function used for reporting issues
 
 //function that parses the request into an array of the user, cipher, and length of cipher
@@ -19,7 +18,7 @@ int parseRequest(char * msg, char ** msgArray){
   char * key = strtok(NULL, "\0");
   msgArray[1] = key;                //store message
   int i, count = 0;
-  if (msgArray[1] == NULL) { return 0; }		//GET request
+  if (key == NULL) { return 0; }		//GET request
 
   for ( i = 0; key[i] != '\0'; i++) { count++; }	//count key length
   char charCount[100];
@@ -59,14 +58,16 @@ int main(int argc, char *argv[])
 		error("ERROR on binding");
 	listen(listenSocketFD, 5); // Flip the socket on - it can now receive up to 5 connections
   while(1){
+    fflush(stdin);
+    fflush(stdout);
     // Accept a connection, blocking if one is not available until one connects
     sizeOfClientInfo = sizeof(clientAddress); // Get the size of the address for the client that will connect
     establishedConnectionFD = accept(listenSocketFD, (struct sockaddr *)&clientAddress, &sizeOfClientInfo); // Accept
     if (establishedConnectionFD < 0) error("ERROR on accept");
-    sleep(2);
     pid = fork();
     if(pid < 0) { error("ERROR forking"); }
     if(pid == 0){
+      sleep(2);
       // Get the message from the client and parse it
       memset(buffer, '\0', bufferSize);
       charsRead = recv(establishedConnectionFD, buffer, (bufferSize-1), 0); // Read the client's message from the socket
@@ -114,6 +115,8 @@ int main(int argc, char *argv[])
         // Send a Success message back to the client
         charsRead = send(establishedConnectionFD, cipherMessage, bufferSize, 0); // Send success back
         if (charsRead < 0) error("ERROR writing to socket");
+        fflush(stdin);
+        fflush(stdout);
       }
       else
       {
@@ -135,13 +138,19 @@ int main(int argc, char *argv[])
         //print path to STDOUT
         char cwd[4097];
         getcwd(cwd, sizeof(cwd));
-        strcat(cwd, &path[1]);
-        fprintf(stdout, "%s\n", cwd);
+        strcat(cwd, "/");
+        strcat(cwd, msgArr[0]);
+        strcat(cwd, "/");
+        fprintf(stdout, "%s", cwd);
+        // Send a Success message back to the client
+        charsRead = send(establishedConnectionFD, "\n\0", 2, 0); // Send success back
+        if (charsRead < 0) error("ERROR writing to socket");
+        fflush(stdin);
+        fflush(stdout);
+        close(establishedConnectionFD); // Close the existing socket which is connected to the client
       }
     }
-    else { waitpid(pid, &status, 0); }//wait for child proccess to complete
   }
-  close(establishedConnectionFD); // Close the existing socket which is connected to the client
   close(listenSocketFD); // Close the listening socket
 	return 0;
 }

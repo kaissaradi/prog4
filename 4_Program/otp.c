@@ -9,7 +9,7 @@
 
 void error(const char *msg) { perror(msg); exit(0); } // Error function used for reporting issues
 //function to convert message into cipher to be sent to server
-void createCipher(char * plainText, char * keyText, char * cipherText){
+void encodeCipher(char * plainText, char * keyText, char * cipherText){
   int i = 0;
   if (strlen(plainText) > strlen(keyText))
   {
@@ -36,6 +36,34 @@ void createCipher(char * plainText, char * keyText, char * cipherText){
   }
 }
 
+void decodeCipher(char * plainText, char * keyText, char * cipherText){
+  int i = 0;
+  if (strlen(cipherText) > strlen(keyText))
+  {
+    error("ERROR Key Too Short");
+  }
+  int textArr[strlen(cipherText)];
+  int cipherArr[strlen(cipherText)];
+  int keyArr[strlen(keyText)];
+  int len = strlen(cipherText);
+  for ( i = 0; i < len; i++)
+  {                                                 //convert text arrays to number and create cipher
+    if (cipherText[i] == 32) { cipherArr[i] = 26; }    //check if cipher contains a space or convert char to numeric representation
+    else { cipherArr[i] = cipherText[i] - 65; }
+    if (keyText[i] == 32) { keyArr[i] = 26; }       //if keytext contains a space or convert char
+    else { keyArr[i] = keyText[i] - 65; }
+                                                    //error checking
+    if (cipherArr[i] < 0 || cipherArr[i] > 26 || keyArr[i] < 0 || keyArr[i] > 26) { error("ERROR Bad Character"); }
+
+    //create text array
+    textArr[i] = cipherArr[i] - keyArr[i];
+    textArr[i] %= 27;
+		if(textArr[i] < 0) { textArr[i] += 27; }
+
+    if (textArr[i] == 26) { plainText[i] = 32; }    //check if plaintext contains a space or convert char to numeric representation
+    else { plainText[i] = textArr[i] + 65; }
+  }
+}
 
 int main(int argc, char *argv[])
 {
@@ -80,16 +108,18 @@ int main(int argc, char *argv[])
 
 	char user[4098];
 	strcpy(user, argv[2]);
+	char plaintText[bufferSize];
+	char keyText[bufferSize];
+	char cipherText[bufferSize];
+	char character;
+	memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer array
 	// make POST request
 	if (postBool)
 	{
-		memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer array
 		//post method
 		//get plaintext file into a string
 		FILE * file = fopen(argv[3], "r");
 		if(file == NULL){ error("ERROR opening file"); }
-		char plaintText[bufferSize];
-		char character;
 		i = 0;
 		do
 		{
@@ -102,7 +132,6 @@ int main(int argc, char *argv[])
 		//get keyText into a string
 		file = fopen(argv[4], "r");
 		if(file == NULL){ error("ERROR opening file"); exit(1); }
-		char keyText[bufferSize];
 		i = 0;
 		do
 		{
@@ -112,13 +141,12 @@ int main(int argc, char *argv[])
 		} while (character != EOF);
 		keyText[strcspn(keyText, "\n")] = '\0'; // Remove the trailing \n that fgets adds
 		fclose(file);
-		char cipherText[bufferSize];
-		createCipher(plaintText, keyText, cipherText);
+		encodeCipher(plaintText, keyText, cipherText);
 		sprintf(buffer, "%s %s", user, cipherText);
 	}
 	//make GET request
 	if(getBool){
-		fprintf(stdout, "%s", user);
+		strcpy(buffer, user);
 	}
 	// Send message to server
 	charsWritten = send(socketFD, buffer, strlen(buffer), 0); // Write to the server
@@ -129,7 +157,32 @@ int main(int argc, char *argv[])
   memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again for reuse
   charsRead = recv(socketFD, buffer, sizeof(buffer) - 1, 0); // Read data from the socket, leaving \0 at end
   if (charsRead < 0) error("CLIENT: ERROR reading from socket");
-  printf("%s", buffer);
+  if(postBool) { printf("%s\n", buffer); }
+	if(getBool) { 
+		//get key file into a string
+		FILE * file = fopen(argv[3], "r");
+		if(file == NULL){ error("ERROR opening file"); }
+		i = 0;
+		do
+		{
+			character = (char)fgetc(file);
+			keyText[i] = character;
+			i++;
+		} while (character != EOF);
+		keyText[strcspn(keyText, "\n")] = '\0'; // Remove the trailing \n that fgets adds
+		buffer[strcspn(buffer, "\n")] = '\0'; // Remove the trailing \n 
+		fclose(file);
+		if(strcmp(buffer,"ERROR") == 0){
+			error("CLIENT: ERROR no message for user");
+		}
+		else { decodeCipher(plaintText, keyText, buffer); }
+		fflush(stdout);
+		fflush(stdin);
+		fprintf(stdout, "%s", plaintText);
+		fflush(stdout);
+		fflush(stdin);
+	}
+
 
 	close(socketFD); // Close the socket
 	return 0;

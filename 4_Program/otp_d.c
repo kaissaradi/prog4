@@ -101,7 +101,12 @@ int main(int argc, char *argv[])
         if(oldestFile == INT_MAX){ error("ERROR user has no file"); }
         strcat(path, oldestCiper);
         file = fopen(path, "r");
-        if (file == NULL) { ("ERROR opening file"); }
+        if (file == NULL) { 
+          // Send a error message back to the client
+          sprintf(cipherMessage, "ERROR");
+          charsRead = send(establishedConnectionFD, cipherMessage, bufferSize, 0); // Send success back
+          if (charsRead < 0) error("ERROR writing to socket");
+        }
         char character;
         i = 0;
         do
@@ -141,6 +146,7 @@ int main(int argc, char *argv[])
         strcat(cwd, "/");
         strcat(cwd, msgArr[0]);
         strcat(cwd, "/");
+        strcat(cwd, path);
         fprintf(stdout, "%s", cwd);
         // Send a Success message back to the client
         charsRead = send(establishedConnectionFD, "\n\0", 2, 0); // Send success back

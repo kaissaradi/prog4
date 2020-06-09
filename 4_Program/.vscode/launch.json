@@ -9,7 +9,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${fileDirname}/${fileBasenameNoExtension}",
-      "args": ["post", "arslan", "plaintext1", "myKey", "port"],
+      "args": ["myKey", "arslan", "myKey", "3000"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],

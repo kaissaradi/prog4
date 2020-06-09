@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
   memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again for reuse
   charsRead = recv(socketFD, buffer, sizeof(buffer) - 1, 0); // Read data from the socket, leaving \0 at end
   if (charsRead < 0) error("CLIENT: ERROR reading from socket");
-  if(postBool) { printf("%s\n", buffer); }
+  if(postBool) { printf("%s", buffer); }
 	if(getBool) { 
 		//get key file into a string
 		FILE * file = fopen(argv[3], "r");
@@ -178,11 +178,10 @@ int main(int argc, char *argv[])
 		else { decodeCipher(plaintText, keyText, buffer); }
 		fflush(stdout);
 		fflush(stdin);
-		fprintf(stdout, "%s", plaintText);
+		fprintf(stdout, "%s\n", plaintText);
 		fflush(stdout);
 		fflush(stdin);
 	}
-
 
 	close(socketFD); // Close the socket
 	return 0;
